@@ -1291,27 +1291,35 @@
                 window.speechSynthesis.cancel();
             }
 
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.lang = 'en-US'; // 设置为英文
-            utterance.rate = 1; // 正常速度
-            utterance.pitch = 1.5; // 提高音调，更女性化
-            utterance.volume = 1; // 最大音量
+            // 延迟播放，确保语音设置正确应用
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US'; // 设置为英文
+                utterance.rate = 1; // 正常速度
+                utterance.pitch = 1.5; // 提高音调，更女性化
+                utterance.volume = 1; // 最大音量
 
-            // 尝试选择女性声音
-            const voices = window.speechSynthesis.getVoices();
-            const femaleVoice = voices.find(voice =>
-                voice.name.includes('Female') ||
-                voice.name.includes('female') ||
-                voice.name.includes('Woman') ||
-                voice.name.includes('woman') ||
-                (voice.name.includes('Google') && voice.name.includes('US'))
-            );
+                // 尝试选择女性声音 - 确保每次都重新获取
+                const voices = window.speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    // 优先选择标记为女性的声音
+                    const femaleVoice = voices.find(voice =>
+                        voice.name.includes('Female') ||
+                        voice.name.includes('female') ||
+                        voice.name.includes('Woman') ||
+                        voice.name.includes('woman')
+                    );
 
-            if (femaleVoice) {
-                utterance.voice = femaleVoice;
-            }
+                    if (femaleVoice) {
+                        utterance.voice = femaleVoice;
+                    } else {
+                        // 如果没有明确的女性声音，使用第一个声音
+                        utterance.voice = voices[0];
+                    }
+                }
 
-            window.speechSynthesis.speak(utterance);
+                window.speechSynthesis.speak(utterance);
+            }, 100);
         }
 
         // 显示消息
