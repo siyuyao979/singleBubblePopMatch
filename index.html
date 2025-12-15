@@ -1286,11 +1286,6 @@
                 return;
             }
 
-            // 停止之前的语音播放
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-            }
-
             const utterance = new SpeechSynthesisUtterance(word);
             utterance.lang = 'en-US'; // 设置为英文
             utterance.rate = 1; // 正常速度
@@ -1316,6 +1311,8 @@
                 }
             }
 
+            // 停止之前的语音播放，然后立即播放新的
+            window.speechSynthesis.cancel();
             window.speechSynthesis.speak(utterance);
         }
 
