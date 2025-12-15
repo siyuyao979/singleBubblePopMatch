@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词泡泡消消乐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 首页 */
+        #indexPage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        #indexPage.hidden {
+            display: none;
+        }
+
+        .index-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .index-header h1 {
+            font-size: 2.8em;
+            color: white;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .index-header p {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* 左侧：上传区和单词列表 */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-card h2 {
+            color: #333;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-tip {
+            background: #f5f5f5;
+            padding: 12px 15px;
+            border-radius: 8px;
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .upload-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #fileInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #fileInput:hover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+        }
+
+        .upload-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(79, 172, 254, 0.3);
+        }
+
+        .upload-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 单词列表区 */
+        .words-list-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .words-list-section h3 {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .words-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .word-item {
+            padding: 12px 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .word-item strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .word-item span {
+            color: #666;
+            margin-left: 8px;
+        }
+
+        /* 右侧：游戏预览/说明 */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .game-preview {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+        }
+
+        .game-preview h2 {
+            color: #333;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+        }
+
+        .bubble-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            min-height: 200px;
+            align-content: center;
+        }
+
+        .bubble-preview-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .start-button-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .start-game-btn {
+            padding: 16px 48px;
+            background: linear-gradient(135deg, #ffb347 0%, #ffa500 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(255, 165, 0, 0.3);
+        }
+
+        .start-game-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(255, 165, 0, 0.4);
+        }
+
+        .start-game-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .start-game-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-btn {
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 游戏页面 */
+        #gamePage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        #gamePage.hidden {
+            display: none;
+        }
+
+        .game-header {
+            display: flex;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .game-title {
+            flex: 1;
+            text-align: center;
+            color: white;
+            font-size: 2em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-stats {
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .game-container {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .bubbles-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            align-content: flex-start;
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+            padding-top: 20px;
+            min-height: 100%;
+        }
+
+        .bubble {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 1.1em;
+            padding: 8px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            border: 3px solid transparent;
+            position: relative;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .bubble.english,
+        .bubble.chinese {
+            color: white;
+        }
+
+        .bubble:hover:not(.matched):not(.disabled) {
+            transform: scale(1.15) translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .bubble.selected {
+            transform: scale(1.25) translateY(-10px);
+            box-shadow: 0 16px 40px rgba(255, 215, 0, 0.5);
+            border-color: #ffeb3b;
+        }
+
+        .bubble.matched {
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+        }
+
+        .bubble.error {
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .bubble.pop {
+            animation: popBubble 0.5s ease-out forwards;
+        }
+
+        @keyframes popBubble {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.15);
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 游戏结束弹窗 */
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            backdrop-filter: blur(5px);
+        }
+
+        .game-over-overlay.show {
+            display: flex;
+        }
+
+        .game-over-content {
+            background: linear-gradient(135deg, rgba(255, 179, 71, 0.98) 0%, rgba(255, 165, 0, 0.98) 100%);
+            padding: 60px 80px;
+            border-radius: 24px;
+            text-align: center;
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-over-content h2 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            animation: bounce 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0% { transform: scale(0) translateY(-50px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        .game-over-content p {
+            font-size: 1.3em;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .game-over-content .congratulations {
+            font-size: 1.4em;
+            margin-bottom: 20px;
+        }
+
+        /* 消息提示 */
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 1200px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .index-header h1 {
+                font-size: 2.2em;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- 首页 -->
+    <div id="indexPage">
+        <div class="index-header">
+            <h1>🫧 单词泡泡消消乐</h1>
+            <p>通过配对英文和中文，增强词汇记忆</p>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- 左侧：上传和单词列表 -->
+            <div class="left-panel">
+                <!-- 上传区 -->
+                <div class="upload-card">
+                    <h2>📁 上传单词文件</h2>
+                    <div class="upload-tip">
+                        上传文件的格式为：第一列为英文单词，第二列为中文意思
+                    </div>
+                    <div class="upload-input-group">
+                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" />
+                        <button class="upload-btn" onclick="uploadFile()">上传</button>
+                    </div>
+                </div>
+
+                <!-- 单词列表 -->
+                <div class="words-list-section">
+                    <h3 id="wordsTitle">📚 示例单词</h3>
+                    <div class="words-list" id="wordsList"></div>
+                </div>
+            </div>
+
+            <!-- 右侧：游戏预览 -->
+            <div class="right-panel">
+                <div class="game-preview">
+                    <h2>🎮 游戏预览</h2>
+                    <div class="bubble-preview" id="bubblePreview"></div>
+                    <div class="start-button-wrapper">
+                        <button class="start-game-btn" onclick="startGame()" id="startBtn">开始游戏</button>
+                        <button class="reset-btn" onclick="resetWords()">清除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏页面 -->
+    <div id="gamePage" class="hidden">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToIndex()">← 返回</button>
+            <div class="game-title">单词泡泡消消乐</div>
+            <div class="game-stats">已消除: <span id="matchCount">0</span>/<span id="totalCount">0</span></div>
+        </div>
+
+        <div class="game-container">
+            <div class="bubbles-area" id="bubblesArea"></div>
+        </div>
+
+        <div class="game-over-overlay" id="gameOverOverlay">
+            <div class="game-over-content">
+                <h2>🎉 太棒啦！</h2>
+                <p class="congratulations">你已经成功消除了所有单词泡泡！</p>
+                <p id="gameStats"></p>
+                <button class="start-game-btn" onclick="backToIndex()" style="margin-top: 20px;">返回首页</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <script>
+        // 示例单词库
+        const SAMPLE_WORDS = [
+            { english: 'apple', chinese: '苹果' },
+            { english: 'cat', chinese: '猫' },
+            { english: 'dog', chinese: '狗' },
+            { english: 'bird', chinese: '鸟' },
+            { english: 'fish', chinese: '鱼' },
+            { english: 'milk', chinese: '牛奶' },
+            { english: 'bread', chinese: '面包' },
+            { english: 'water', chinese: '水' },
+            { english: 'tree', chinese: '树' },
+            { english: 'sun', chinese: '太阳' },
+            { english: 'moon', chinese: '月亮' },
+            { english: 'star', chinese: '星星' },
+            { english: 'red', chinese: '红色' },
+            { english: 'blue', chinese: '蓝色' },
+            { english: 'green', chinese: '绿色' },
+            { english: 'happy', chinese: '开心' },
+            { english: 'sad', chinese: '伤心' },
+            { english: 'run', chinese: '跑' },
+            { english: 'jump', chinese: '跳' },
+            { english: 'book', chinese: '书' }
+        ];
+
+        let words = [...SAMPLE_WORDS];
+        let gameState = {
+            bubbles: [],
+            selectedBubble: null,
+            matchedCount: 0,
+            gameActive: false
+        };
+
+        // 初始化
+        function init() {
+            displayWords();
+            generatePreviewBubbles();
+        }
+
+        // 显示单词列表
+        function displayWords() {
+            const wordsList = document.getElementById('wordsList');
+            wordsList.innerHTML = '';
+
+            words.forEach(word => {
+                const item = document.createElement('div');
+                item.className = 'word-item';
+                item.innerHTML = `<strong>${word.english}</strong><span>${word.chinese}</span>`;
+                wordsList.appendChild(item);
+            });
+
+            document.getElementById('startBtn').disabled = words.length === 0;
+        }
+
+        // 生成预览泡泡
+        function generatePreviewBubbles() {
+            const preview = document.getElementById('bubblePreview');
+            preview.innerHTML = '';
+
+            const previewColors = {
+                english: [
+                    'linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%)',
+                    'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)',
+                    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                    'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)',
+                    'linear-gradient(135deg, #ff8c42 0%, #ff5722 100%)',
+                    'linear-gradient(135deg, #ff7675 0%, #ffc069 100%)',
+                ],
+                chinese: [
+                    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                    'linear-gradient(135deg, #74b9ff 0%, #a29bfe 100%)',
+                    'linear-gradient(135deg, #55efc4 0%, #74b9ff 100%)',
+                ]
+            };
+
+            const previewWords = words.slice(0, 6);
+            previewWords.forEach((word, index) => {
+                const bubble1 = document.createElement('div');
+                bubble1.className = 'bubble-preview-item english';
+                bubble1.textContent = word.english;
+                bubble1.style.background = previewColors.english[index % previewColors.english.length];
+                preview.appendChild(bubble1);
+
+                const bubble2 = document.createElement('div');
+                bubble2.className = 'bubble-preview-item chinese';
+                bubble2.textContent = word.chinese;
+                bubble2.style.background = previewColors.chinese[index % previewColors.chinese.length];
+                preview.appendChild(bubble2);
+            });
+        }
+
+        // 上传文件
+        function uploadFile() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) {
+                showMessage('请选择文件', 'error');
+                return;
+            }
+
+            const fileName = file.name.toLowerCase();
+
+            // 处理 .xlsx 文件
+            if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+
+                        // 等待 XLSX 库加载
+                        const checkXLSX = setInterval(() => {
+                            if (typeof XLSX !== 'undefined') {
+                                clearInterval(checkXLSX);
+                                processExcelFile(data);
+                            }
+                        }, 100);
+
+                        // 超时提示
+                        setTimeout(() => {
+                            clearInterval(checkXLSX);
+                            if (typeof XLSX === 'undefined') {
+                                showMessage('Excel库加载超时，请使用CSV格式或刷新页面重试', 'error');
+                            }
+                        }, 5000);
+
+                    } catch (err) {
+                        console.error('文件读取错误:', err);
+                        showMessage('文件读取失败: ' + err.message, 'error');
+                    }
+                };
+                reader.onerror = function() {
+                    showMessage('文件读取失败，请重试', 'error');
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            // 处理 .csv 文件
+            else if (fileName.endsWith('.csv')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const arrayBuffer = e.target.result;
+
+                    // 尝试多种编码方式
+                    let text = null;
+                    const encodings = ['utf-8', 'gbk', 'gb2312', 'big5'];
+
+                    for (let encoding of encodings) {
+                        try {
+                            const decoder = new TextDecoder(encoding);
+                            text = decoder.decode(arrayBuffer);
+                            // 如果包含中文或其他非ASCII字符且没有乱码，则成功
+                            if (text.includes('中') || text.includes('英') || !hasGarbled(text)) {
+                                break;
+                            }
+                        } catch (err) {
+                            continue;
+                        }
+                    }
+
+                    // 如果所有编码都尝试过，用UTF-8
+                    if (!text) {
+                        const decoder = new TextDecoder('utf-8');
+                        text = decoder.decode(arrayBuffer);
+                    }
+
+                    parseCSV(text);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            else {
+                showMessage('不支持的文件格式，请上传 .xlsx、.xls 或 .csv 文件', 'error');
+            }
+        }
+
+        // 处理 Excel 文件
+        function processExcelFile(data) {
+            try {
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+                    showMessage('Excel文件为空或格式不支持', 'error');
+                    return;
+                }
+
+                // 获取第一个工作表
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                if (!worksheet) {
+                    showMessage('无法读取Excel工作表', 'error');
+                    return;
+                }
+
+                // 转换为数组格式
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                    header: 1,
+                    defval: ''
+                });
+
+                if (!jsonData || jsonData.length === 0) {
+                    showMessage('Excel文件中没有数据', 'error');
+                    return;
+                }
+
+                parseExcelData(jsonData);
+            } catch (err) {
+                console.error('Excel解析错误:', err);
+                showMessage('Excel文件解析失败: ' + err.message, 'error');
+            }
+        }
+
+        // 解析Excel数据
+        function parseExcelData(jsonData) {
+            const parsedWords = [];
+
+            // 遍历所有行
+            for (let i = 0; i < jsonData.length; i++) {
+                const row = jsonData[i];
+
+                // 跳过空行
+                if (!row || row.length < 2) continue;
+
+                let english = String(row[0] || '').trim();
+                let chinese = String(row[1] || '').trim();
+
+                // 跳过标题行（如果第一行都是英文且看起来像标题）
+                if (i === 0 && (english.toLowerCase() === 'english' || english.toLowerCase() === 'word' ||
+                    chinese.toLowerCase() === 'chinese' || chinese.toLowerCase() === 'meaning')) {
+                    continue;
+                }
+
+                // 过滤掉数字标号（如果第一列是数字，跳过）
+                if (!isNaN(english) && english.length < 3) {
+                    english = String(row[1] || '').trim();
+                    chinese = String(row[2] || '').trim();
+                }
+
+                if (english && chinese && english.length > 0 && chinese.length > 0) {
+                    parsedWords.push({
+                        english: english,
+                        chinese: chinese
+                    });
+                }
+            }
+
+            if (parsedWords.length === 0) {
+                showMessage('Excel文件中没有找到有效的单词数据', 'error');
+                return;
+            }
+
+            words = parsedWords;
+            document.getElementById('wordsTitle').textContent = '📚 已上传单词';
+            displayWords();
+            generatePreviewBubbles();
+            showMessage(`成功导入 ${words.length} 个单词！`, 'success');
+        }
+
+        // 检查是否有乱码
+        function hasGarbled(text) {
+            // 检查是否有太多不可打印字符
+            const unprintable = (text.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g) || []).length;
+            return unprintable > text.length * 0.1;
+        }
+
+        // 解析CSV
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const parsedWords = [];
+
+            for (let line of lines) {
+                // 跳过空行和Excel格式行
+                if (!line.trim()) continue;
+
+                // 支持逗号和制表符分隔
+                let parts = line.split(',');
+                if (parts.length < 2) {
+                    parts = line.split('\t');
+                }
+
+                parts = parts.map(p => p.trim()).filter(p => p);
+
+                if (parts.length >= 2) {
+                    parsedWords.push({
+                        english: parts[0],
+                        chinese: parts[1]
+                    });
+                }
+            }
+
+            if (parsedWords.length === 0) {
+                showMessage('文件格式错误，请检查CSV文件', 'error');
+                return;
+            }
+
+            words = parsedWords;
+            document.getElementById('wordsTitle').textContent = '📚 已上传单词';
+            displayWords();
+            generatePreviewBubbles();
+            showMessage(`成功导入 ${words.length} 个单词！`, 'success');
+        }
+
+        // 清除单词
+        function resetWords() {
+            if (confirm('确定要清除已上传的单词，恢复示例单词吗？')) {
+                words = [...SAMPLE_WORDS];
+                document.getElementById('fileInput').value = '';
+                document.getElementById('wordsTitle').textContent = '📚 示例单词';
+                displayWords();
+                generatePreviewBubbles();
+                showMessage('已恢复示例单词', 'success');
+            }
+        }
+
+        // 开始游戏
+        function startGame() {
+            if (words.length === 0) {
+                showMessage('请先添加单词', 'error');
+                return;
+            }
+
+            document.getElementById('indexPage').classList.add('hidden');
+            document.getElementById('gamePage').classList.remove('hidden');
+            gameState.matchedCount = 0;
+            gameState.gameActive = true;
+            gameState.selectedBubble = null;
+
+            createBubbles();
+            updateGameStats();
+        }
+
+        // 泡泡颜色库
+        const bubbleColors = {
+            english: [
+                'linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%)',      // 橙红
+                'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)',      // 粉红
+                'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',      // 粉黄
+                'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)',      // 红蓝
+                'linear-gradient(135deg, #ff8c42 0%, #ff5722 100%)',      // 深橙
+                'linear-gradient(135deg, #ff7675 0%, #ffc069 100%)',      // 红黄
+            ],
+            chinese: [
+                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',      // 绿青
+                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',      // 蓝青
+                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',      // 绿青
+                'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',      // 青粉
+                'linear-gradient(135deg, #74b9ff 0%, #a29bfe 100%)',      // 蓝紫
+                'linear-gradient(135deg, #55efc4 0%, #74b9ff 100%)',      // 绿蓝
+            ]
+        };
+
+        // 创建游戏泡泡
+        function createBubbles() {
+            const container = document.getElementById('bubblesArea');
+            container.innerHTML = '';
+
+            gameState.bubbles = [];
+            let id = 0;
+
+            // 创建英文和中文泡泡对
+            words.forEach((word, index) => {
+                gameState.bubbles.push({
+                    id: id++,
+                    text: word.english,
+                    type: 'english',
+                    pair: word.chinese,
+                    matched: false,
+                    colorIndex: index % bubbleColors.english.length
+                });
+
+                gameState.bubbles.push({
+                    id: id++,
+                    text: word.chinese,
+                    type: 'chinese',
+                    pair: word.english,
+                    matched: false,
+                    colorIndex: index % bubbleColors.chinese.length
+                });
+            });
+
+            // 随机打乱
+            shuffleArray(gameState.bubbles);
+
+            // 随机大小
+            gameState.bubbles.forEach(bubble => {
+                bubble.size = 80 + Math.random() * 40; // 80-120px
+            });
+
+            // 渲染泡泡
+            gameState.bubbles.forEach(bubble => {
+                const bubbleEl = document.createElement('div');
+                bubbleEl.className = `bubble ${bubble.type}`;
+                bubbleEl.textContent = bubble.text;
+                bubbleEl.style.width = bubble.size + 'px';
+                bubbleEl.style.height = bubble.size + 'px';
+
+                // 根据文字长度调整字体大小
+                const textLength = bubble.text.length;
+                let fontSize;
+                if (textLength <= 4) {
+                    fontSize = bubble.size * 0.16; // 短单词用更大字号
+                } else if (textLength <= 7) {
+                    fontSize = bubble.size * 0.14;
+                } else {
+                    fontSize = bubble.size * 0.12; // 长单词用较小字号
+                }
+                bubbleEl.style.fontSize = fontSize + 'px';
+
+                // 应用颜色
+                const colorGradient = bubble.type === 'english'
+                    ? bubbleColors.english[bubble.colorIndex]
+                    : bubbleColors.chinese[bubble.colorIndex];
+                bubbleEl.style.background = colorGradient;
+
+                bubbleEl.dataset.id = bubble.id;
+                bubbleEl.onclick = (e) => {
+                    e.stopPropagation();
+                    selectBubble(bubble, bubbleEl);
+                };
+                container.appendChild(bubbleEl);
+            });
+        }
+
+        // 随机打乱
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // 选择泡泡
+        function selectBubble(bubble, element) {
+            if (!gameState.gameActive || bubble.matched) return;
+
+            if (gameState.selectedBubble && gameState.selectedBubble.id === bubble.id) {
+                gameState.selectedBubble = null;
+                element.classList.remove('selected');
+                return;
+            }
+
+            if (gameState.selectedBubble) {
+                const selectedEl = document.querySelector(`[data-id="${gameState.selectedBubble.id}"]`);
+
+                if (bubble.pair === gameState.selectedBubble.text &&
+                    gameState.selectedBubble.pair === bubble.text) {
+                    // 匹配成功
+                    selectedEl.classList.add('pop');
+                    element.classList.add('pop');
+
+                    setTimeout(() => {
+                        selectedEl.classList.add('matched');
+                        element.classList.add('matched');
+                        bubble.matched = true;
+                        gameState.selectedBubble.matched = true;
+                        gameState.selectedBubble = null;
+                        gameState.matchedCount++;
+                        updateGameStats();
+
+                        showMessage('✨ 匹配成功！', 'success');
+
+                        if (gameState.matchedCount === words.length) {
+                            endGame();
+                        }
+                    }, 250);
+                } else {
+                    // 匹配失败
+                    selectedEl.classList.add('error');
+                    element.classList.add('error');
+                    showMessage('❌ 不匹配，请重试', 'error');
+
+                    setTimeout(() => {
+                        selectedEl.classList.remove('selected', 'error');
+                        element.classList.remove('error');
+                        gameState.selectedBubble = null;
+                    }, 500);
+                }
+            } else {
+                gameState.selectedBubble = bubble;
+                element.classList.add('selected');
+            }
+        }
+
+        // 更新游戏统计
+        function updateGameStats() {
+            document.getElementById('matchCount').textContent = gameState.matchedCount;
+            document.getElementById('totalCount').textContent = words.length;
+        }
+
+        // 游戏结束
+        function endGame() {
+            gameState.gameActive = false;
+            document.getElementById('gameOverOverlay').classList.add('show');
+        }
+
+        // 返回首页
+        function backToIndex() {
+            document.getElementById('gamePage').classList.add('hidden');
+            document.getElementById('indexPage').classList.remove('hidden');
+            document.getElementById('gameOverOverlay').classList.remove('show');
+            gameState.selectedBubble = null;
+            gameState.gameActive = false;
+        }
+
+        // 显示消息
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message show ${type}`;
+            setTimeout(() => {
+                messageEl.className = 'message';
+            }, 2000);
+        }
+
+        // 初始化
+        init();
+    </script>
+
+    <!-- 加载 SheetJS 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
