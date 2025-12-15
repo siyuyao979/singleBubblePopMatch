@@ -1130,25 +1130,25 @@
                     // 播放音效
                     playPopSound();
 
+                    // 获取英文单词用于语音播放（在音效前播放，这样能同时发）
+                    const englishWord = gameState.selectedBubble.type === 'english'
+                        ? gameState.selectedBubble.text
+                        : bubble.text;
+
+                    // 立即播放语音（和音效一起）
+                    speakEnglishWord(englishWord);
+
                     setTimeout(() => {
                         selectedEl.classList.add('matched');
                         element.classList.add('matched');
                         bubble.matched = true;
                         gameState.selectedBubble.matched = true;
 
-                        // 获取英文单词用于语音播放
-                        const englishWord = gameState.selectedBubble.type === 'english'
-                            ? gameState.selectedBubble.text
-                            : bubble.text;
-
                         gameState.selectedBubble = null;
                         gameState.matchedCount++;
                         updateGameStats();
 
                         showMessage('✨ 匹配成功！', 'success');
-
-                        // 播放英文单词语音
-                        speakEnglishWord(englishWord);
 
                         if (gameState.matchedCount === words.length) {
                             endGame();
