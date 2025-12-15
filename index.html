@@ -1067,11 +1067,20 @@
                         element.classList.add('matched');
                         bubble.matched = true;
                         gameState.selectedBubble.matched = true;
+
+                        // 获取英文单词用于语音播放
+                        const englishWord = gameState.selectedBubble.type === 'english'
+                            ? gameState.selectedBubble.text
+                            : bubble.text;
+
                         gameState.selectedBubble = null;
                         gameState.matchedCount++;
                         updateGameStats();
 
                         showMessage('✨ 匹配成功！', 'success');
+
+                        // 播放英文单词语音
+                        speakEnglishWord(englishWord);
 
                         if (gameState.matchedCount === words.length) {
                             endGame();
@@ -1114,6 +1123,29 @@
             document.getElementById('gameOverOverlay').classList.remove('show');
             gameState.selectedBubble = null;
             gameState.gameActive = false;
+        }
+
+        // 播放英文单词语音
+        function speakEnglishWord(word) {
+            // 检查浏览器是否支持 Web Speech API
+            const SpeechSynthesisUtterance = window.SpeechSynthesisUtterance || window.webkitSpeechSynthesisUtterance;
+            if (!SpeechSynthesisUtterance) {
+                console.warn('浏览器不支持语音合成');
+                return;
+            }
+
+            // 停止之前的语音播放
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US'; // 设置为英文
+            utterance.rate = 1; // 正常速度
+            utterance.pitch = 1; // 正常音调
+            utterance.volume = 1; // 最大音量
+
+            window.speechSynthesis.speak(utterance);
         }
 
         // 显示消息
